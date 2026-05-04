@@ -17,9 +17,7 @@ export default function SensitivityPanel({ data }) {
         <p className="text-xs text-gray-500 uppercase tracking-wide">
           Analysis
         </p>
-        <h2 className="text-lg font-semibold text-cyan-300">
-          Sensitivity Analysis
-        </h2>
+       
       </div>
 
       <div className="h-[1px] bg-gradient-to-r from-transparent via-gray-700 to-transparent" />

@@ -2,6 +2,7 @@ import SolverForm from "../components/SolverForm";
 import ResultsPanel from "../components/ResultsPanel";
 import StepsViewer from "../components/StepsViewer";
 import SensitivityPanel from "../components/SensitivtyPanel";
+import GraphPanel from "../components/GraphPanel";   // 👈 NEW
 import { useState, useRef, useEffect } from "react";
 
 export default function SolverPage() {
@@ -9,7 +10,7 @@ export default function SolverPage() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showSteps, setShowSteps] = useState(false);
-
+  const [showGraph, setShowGraph] = useState(false);
   const handleSolve = (res) => {
     setLoading(true);
     setTimeout(() => {
@@ -74,6 +75,7 @@ grid grid-cols-2 gap-8">
                   steps={data.steps}
                   onShowSteps={() => setShowSteps(true)}
                   onShowSensitivity={() => setShowSensitivity(true)}
+                  onShowGraph={() => setShowGraph(true)}   // 👈 NEW
                 />
 
               </div>
@@ -107,28 +109,51 @@ grid grid-cols-2 gap-8">
           </div>
         </div>
       )}
-      
-{showSensitivity && (
-  <div className="fixed inset-0 z-50 flex">
 
-    {/* overlay */}
-    <div
-      className="absolute inset-0 bg-black/50"
-      onClick={() => setShowSensitivity(false)}
-    />
+      {showSensitivity && (
+        <div className="fixed inset-0 z-50 flex">
 
-    {/* panel */}
-    <div className="relative ml-auto w-[500px] h-full 
+          {/* overlay */}
+          <div
+            className="absolute inset-0 bg-black/50"
+            onClick={() => setShowSensitivity(false)}
+          />
+
+          {/* panel */}
+          <div className="relative ml-auto w-[500px] h-full 
     bg-gray-900 p-4 overflow-y-auto shadow-2xl animate-slideIn">
 
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-bold text-cyan-300">
-          Sensitivity Analysis
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-bold text-cyan-300">
+                Sensitivity Analysis
+              </h2>
+              <button onClick={() => setShowSensitivity(false)}>✕</button>
+            </div>
+
+            <SensitivityPanel data={data} />
+          </div>
+        </div>
+      )}
+      {showGraph && (
+  <div className="fixed inset-0 z-50 flex">
+
+    <div
+      className="absolute inset-0 bg-black/50"
+      onClick={() => setShowGraph(false)}
+    />
+
+    <div className="relative m-auto w-[700px] h-[500px] 
+    bg-gray-900 p-6 rounded-xl shadow-2xl border border-cyan-400/10">
+
+      <div className="flex justify-between mb-4">
+        <h2 className="text-cyan-300 font-semibold">
+          Feasible Region
         </h2>
-        <button onClick={() => setShowSensitivity(false)}>✕</button>
+        <button onClick={() => setShowGraph(false)}>✕</button>
       </div>
 
-      <SensitivityPanel data={data} />
+      <GraphPanel data={data} />
+
     </div>
   </div>
 )}

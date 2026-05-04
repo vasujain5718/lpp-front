@@ -1,4 +1,4 @@
-export default function ResultsPanel({ results, status, steps, onShowSteps , onShowSensitivity}) {
+export default function ResultsPanel({ results, status, steps, onShowSteps, onShowSensitivity,onShowGraph }) {
   if (!status) return null;
 
   const statusColor = {
@@ -6,7 +6,7 @@ export default function ResultsPanel({ results, status, steps, onShowSteps , onS
     Unbounded: "text-yellow-400 bg-yellow-400/10",
     Infeasible: "text-red-400 bg-red-400/10",
   };
-
+  const is2D = results?.vars?.length === 2;
   const finalStep = steps?.[steps.length - 1];
 
   return (
@@ -104,24 +104,34 @@ export default function ResultsPanel({ results, status, steps, onShowSteps , onS
         </>
       )}
       <div className="mt-auto pt-6 flex justify-center gap-4">
-  
-  <button
-    onClick={onShowSteps}
-    className="bg-gradient-to-r from-cyan-400 to-emerald-400 
-    text-black px-5 py-2 rounded-lg font-semibold hover:scale-105 transition shadow-lg"
-  >
-    Step-by-Step
-  </button>
 
-  <button
-    onClick={onShowSensitivity}
-   className="bg-gradient-to-r from-cyan-400 to-emerald-400 
+        <button
+          onClick={onShowSteps}
+          className="bg-gradient-to-r from-cyan-400 to-emerald-400 
     text-black px-5 py-2 rounded-lg font-semibold hover:scale-105 transition shadow-lg"
-  >
-    Sensitivity
-  </button>
+        >
+          Step-by-Step
+        </button>
 
-</div>
+        <button
+          onClick={onShowSensitivity}
+          className="bg-gradient-to-r from-cyan-400 to-emerald-400 
+    text-black px-5 py-2 rounded-lg font-semibold hover:scale-105 transition shadow-lg"
+        >
+          Sensitivity
+        </button>
+
+        {is2D && (
+          <button
+            onClick={onShowGraph}
+             className="bg-gradient-to-r from-cyan-400 to-emerald-400 
+    text-black px-5 py-2 rounded-lg font-semibold hover:scale-105 transition shadow-lg"
+          >
+            Graph
+          </button>
+        )}
+
+      </div>
     </div>
   );
 }
