@@ -66,7 +66,7 @@ export default function GraphPanel({ data }) {
     };
 
     // =========================
-    // 🔥 2. Intersection & Feasibility
+    // 🔥 2. Compute Feasible Region
     // =========================
     const intersect = (a1, b1, c1, a2, b2, c2) => {
         a1 = Number(a1); b1 = Number(b1); c1 = Number(c1);
@@ -91,7 +91,6 @@ export default function GraphPanel({ data }) {
 
             if (a1 * x + a2 * y > rhs + 1e-6) return false;
         }
-
         return true;
     };
 
@@ -144,43 +143,19 @@ export default function GraphPanel({ data }) {
     );
 
     // =========================
-    // 🔥 3. THE FIX: Render Polygon via Scatter Shape
+    // 🔥 3. THE BULLETPROOF FIX: Closed-Loop Polygon Data
+    // We copy the very first point and add it to the end of the array.
+    // This forces the Scatter 'line' to connect the end to the start, forming a closed shape.
     // =========================
-    const renderShadedPolygon = (props) => {
-        // Recharts inherently passes accurate, updated scales to Scatter shapes
-        const { xAxis, yAxis } = props;
-
-        if (!xAxis || !yAxis || !region || region.length < 3) return null;
-
-        try {
-            const pointsStr = region
-                .map((p) => `${xAxis.scale(p.x)},${yAxis.scale(p.y)}`)
-                .join(" ");
-
-            return (
-                <polygon
-                    points={pointsStr}
-                    fill="#22d3ee"
-                    fillOpacity={0.4} 
-                    stroke="#22d3ee"
-                    strokeWidth={1}
-                    pointerEvents="none" 
-                />
-            );
-        } catch (error) {
-            console.error("Scale mapping failed:", error);
-            return null;
-        }
-    };
+    const polygonData = region.length >= 3 ? [...region, region[0]] : [];
 
     // =========================
     // 🎯 RENDER
     // =========================
     return (
         <div className="w-full h-[400px]">
-            {/* Added explicit 100% dimensions to force the container to size correctly */}
-            <ResponsiveContainer width="100%" height="100%">
-                <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+            <ResponsiveContainer>
+                <ScatterChart margin={{ top: 10, right: 20, bottom: 10, left: -10 }}>
                     <CartesianGrid stroke="#1f2937" strokeDasharray="3 3" />
 
                     <XAxis
@@ -224,11 +199,18 @@ export default function GraphPanel({ data }) {
                         }}
                     />
 
-                    {/* 🔥 HACK: Pass the polygon inside a dummy Scatter point anchored to the center */}
-                    {region.length >= 3 && (
+                    {/* 🔥 THE MAGIC TRICK: Render the polygon natively through Scatter */}
+                    {polygonData.length >= 3 && (
                         <Scatter
-                            data={[{ x: center.x, y: center.y }]}
-                            shape={renderShadedPolygon}
+                            data={polygonData}
+                            line={{
+                                fill: "#22d3ee",       // The SVG fill makes it a shaded polygon!
+                                fillOpacity: 0.35,     // Perfect contrast for Dark Mode
+                                stroke: "#22d3ee",     // Edge definition
+                                strokeWidth: 1
+                            }}
+                            shape={() => <g />}        // Hides the individual dots on the polygon edges
+                            activeShape={() => <g />}  // Hides the hover dot
                             isAnimationActive={false}
                         />
                     )}
@@ -236,7 +218,7 @@ export default function GraphPanel({ data }) {
                     {/* CONSTRAINT LINES */}
                     {lines.map((line, i) => (
                         <Scatter
-                            key={i}
+                            key={`line-${i}`}
                             data={line}
                             fill="#22d3ee"
                             line={{ stroke: "#22d3ee", strokeWidth: 2 }}
